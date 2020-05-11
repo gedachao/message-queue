@@ -1,4 +1,4 @@
-package com.kong.mqproject1.fanout;
+package com.kong.mqproject1.exchange.fanout;
 
 import com.kong.mqproject1.commonTools.MqFactory;
 import com.rabbitmq.client.Channel;

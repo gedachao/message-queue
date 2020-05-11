@@ -1,4 +1,4 @@
-package com.kong.mqproject1.quickstart;
+package com.kong.mqproject1.exchange.quickstart;
 
 import com.kong.mqproject1.commonTools.MqFactory;
 import com.rabbitmq.client.Channel;
