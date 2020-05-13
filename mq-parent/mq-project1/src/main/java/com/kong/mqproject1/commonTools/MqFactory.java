@@ -13,7 +13,7 @@ import java.util.Properties;
  * @date 2020/5/9 14:29
  */
 public class MqFactory {
-    private final static String resUrl = "mq/mq.properties";
+    private final static String resUrl = "mq/mq-home.properties";
     public static ConnectionFactory getConnectFactory(){
         ConnectionFactory connectionFactory = new ConnectionFactory();
         Properties properties = new Properties();
