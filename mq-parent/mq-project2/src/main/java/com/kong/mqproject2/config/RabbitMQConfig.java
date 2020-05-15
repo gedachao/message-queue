@@ -1,5 +1,6 @@
 package com.kong.mqproject2.config;
 
+import com.kong.mqproject2.convert.TextMessageConvert;
 import com.rabbitmq.client.Channel;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
@@ -8,17 +9,16 @@ import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
-import org.springframework.amqp.rabbit.listener.api.ChannelAwareBatchMessageListener;
 import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
 import org.springframework.amqp.support.ConsumerTagStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -35,7 +35,7 @@ public class RabbitMQConfig {
     @Bean
     public ConnectionFactory connectionFactory() throws IOException {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
-        InputStream inputStream = RabbitMQConfig.class.getResourceAsStream("/mq/mq.properties");
+        InputStream inputStream = RabbitMQConfig.class.getResourceAsStream("/mq/mq-home.properties");
         Properties properties = new Properties();
         properties.load(inputStream);
         connectionFactory.setAddresses(properties.getProperty("mq.host"));
@@ -107,18 +107,38 @@ public class RabbitMQConfig {
                 return s+"_"+ UUID.randomUUID().toString();
             }
         });
-        /*container.setMessageListener(new ChannelAwareMessageListener() {
-            @Override
-            public void onMessage(Message message, Channel channel) throws Exception {
-                String str  = new String(message.getBody());
-                System.out.println("消费者："+str);
-            }
-        });*/
+
+    /**
+     * //设置消息监听器的方式1
+     * container.setMessageListener(new ChannelAwareMessageListener() {
+     *             @Override
+     *             public void onMessage(Message message, Channel channel) throws Exception {
+     *                 String str  = new String(message.getBody());
+     *                 System.out.println("消费者："+str);
+     *             }
+     *         });
+     */
+
+
 
         MessageListenerAdapter adapter = new MessageListenerAdapter(new MessageDelegate());
-//        adapter.setDefaultListenerMethod("sef");
+        //自定义监听方法，默认的监听方法为handleMessage
+        adapter.setDefaultListenerMethod("consumeMessageString");
+        //设置转换器
+        adapter.setMessageConverter(new TextMessageConvert());
+
+
+        /**
+         * Map<String,String> queueOrTagToMethodName = new HashMap<>();
+         * //将queue和MessageDelegate中的方法(method001,method002)绑定，即指定的queue的消息发送至指定的方法中
+         * queueOrTagToMethodName.put("queue001","method001");
+         * queueOrTagToMethodName.put("queue001","method001");
+         * adapter.setQueueOrTagToMethodName(queueOrTagToMethodName);
+         */
         container.setMessageListener(adapter);
         return container;
+
+
     }
 
 

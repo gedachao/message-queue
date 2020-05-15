@@ -65,6 +65,7 @@ class ApplicationTests {
     public void testSendMessage() throws Exception{
         String msg = "Hello,testSendMessage()";
         MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setContentType("text/plain");
         messageProperties.getHeaders().put("desc","消息描述");
         messageProperties.getHeaders().put("type","自定义消息类型");
         Message message = new Message(msg.getBytes(), messageProperties);
