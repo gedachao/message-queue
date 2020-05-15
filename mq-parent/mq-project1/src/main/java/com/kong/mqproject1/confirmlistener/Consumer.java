@@ -15,12 +15,12 @@ public class Consumer {
         Connection connection = MqFactory.getConnection();
         Channel channel = connection.createChannel();
         //指定消息投递模式：消息的确认模式
-        String exchangeName = "test_confirm_exchange";
+        String exchange = "test_confirm_exchange";
         String routingKey = "confirm.#";
         String queueName = "test_confirm_queue";
-        channel.exchangeDeclare(exchangeName,"topic",true);
+        channel.exchangeDeclare(exchange,"topic",true);
         channel.queueDeclare(queueName,true,false,false,null);
-        channel.queueBind(queueName,exchangeName,routingKey);
+        channel.queueBind(queueName,exchange,routingKey);
 
         QueueingConsumer consumer = new QueueingConsumer(channel);
         channel.basicConsume(queueName,true,consumer);
@@ -29,6 +29,7 @@ public class Consumer {
             String msg = new String(delivery.getBody());
             System.out.println(msg);
         }
+
 
 
     }
