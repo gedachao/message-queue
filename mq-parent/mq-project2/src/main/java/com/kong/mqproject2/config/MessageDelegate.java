@@ -1,5 +1,7 @@
 package com.kong.mqproject2.config;
 
+import java.util.Map;
+
 /**
  * @author gedachao
  * @description
@@ -11,10 +13,14 @@ public class MessageDelegate {
     }
 
     public void consumeMessage(byte[] message){
-        System.out.println("自定义方法consumeMessage(),消息内容:"+new String(message));
+        System.out.println("自定义方法,字节数组,消息内容:"+new String(message));
     }
 
     public void consumeMessageString(String message){
         System.out.println("自定义方法consumeMessageString(),消息内容:"+message);
+    }
+
+    public void consumeMessage(Map messageBody){
+        System.out.println("map方法,消息内容："+messageBody);
     }
 }

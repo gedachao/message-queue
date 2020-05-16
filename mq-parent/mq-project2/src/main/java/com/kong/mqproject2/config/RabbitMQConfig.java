@@ -11,6 +11,8 @@ import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
 import org.springframework.amqp.rabbit.listener.api.ChannelAwareMessageListener;
 import org.springframework.amqp.support.ConsumerTagStrategy;
+import org.springframework.amqp.support.converter.DefaultJackson2JavaTypeMapper;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +37,7 @@ public class RabbitMQConfig {
     @Bean
     public ConnectionFactory connectionFactory() throws IOException {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
-        InputStream inputStream = RabbitMQConfig.class.getResourceAsStream("/mq/mq-home.properties");
+        InputStream inputStream = RabbitMQConfig.class.getResourceAsStream("/mq/mq.properties");
         Properties properties = new Properties();
         properties.load(inputStream);
         connectionFactory.setAddresses(properties.getProperty("mq.host"));
@@ -124,23 +126,58 @@ public class RabbitMQConfig {
         MessageListenerAdapter adapter = new MessageListenerAdapter(new MessageDelegate());
         //自定义监听方法，默认的监听方法为handleMessage
         adapter.setDefaultListenerMethod("consumeMessageString");
+
+        /**
+         *         //设置转化器1Json
+         *         Jackson2JsonMessageConverter jackson2JsonMessageConverter = new Jackson2JsonMessageConverter();
+         *         adapter.setMessageConverter(jackson2JsonMessageConverter);
+         *         //需要在发送端设置messageProperties.setContentType("application/json");
+         */
+
+
+        /**
+         *         //设置转换器2,Java的object类型转换
+         *         Jackson2JsonMessageConverter jackson2JsonMessageConverter = new Jackson2JsonMessageConverter();
+         *         DefaultJackson2JavaTypeMapper javaTypeMapper = new DefaultJackson2JavaTypeMapper();
+         *         jackson2JsonMessageConverter.setJavaTypeMapper(javaTypeMapper);
+         *         adapter.setMessageConverter(jackson2JsonMessageConverter);
+         *         //需要在发送端设置：messageProperties.getHeaders().put("__TypeId__","com.kong.your.class");
+         */
+
+        /**
+         *         //Json转为Java时，将Json中的指定标签转为指定Java类
+         *         Jackson2JsonMessageConverter jackson2JsonMessageConverter = new Jackson2JsonMessageConverter();
+         *         DefaultJackson2JavaTypeMapper javaTypeMapper = new DefaultJackson2JavaTypeMapper();
+         *         HashMap<String, Class<?>> idClassMapping = new HashMap<String, Class<?>>();
+         *         idClassMapping.put("yourClassName1",com.kong.YourClass1.class);
+         *         idClassMapping.put("yourClassName2",com.kong.YourClass2.class);
+         *         javaTypeMapper.setIdClassMapping(idClassMapping);
+         *         jackson2JsonMessageConverter.setJavaTypeMapper(javaTypeMapper);
+         *         adapter.setMessageConverter(jackson2JsonMessageConverter);
+         *         //此时需要再发送端指定messageProperties.getHeaders.put("__TypeId__","yourSimpleClassName");
+         *         //只需指定简单类名即可,不需要指定全路径
+         *
+         */
+
+
+
+
         //设置转换器
         adapter.setMessageConverter(new TextMessageConvert());
 
 
         /**
-         * Map<String,String> queueOrTagToMethodName = new HashMap<>();
-         * //将queue和MessageDelegate中的方法(method001,method002)绑定，即指定的queue的消息发送至指定的方法中
-         * queueOrTagToMethodName.put("queue001","method001");
-         * queueOrTagToMethodName.put("queue001","method001");
-         * adapter.setQueueOrTagToMethodName(queueOrTagToMethodName);
+         *          Map<String,String> queueOrTagToMethodName = new HashMap<>();
+         *          //将queue和MessageDelegate中的方法(method001,method002)绑定，即指定的queue的消息发送至指定的方法中
+         *          queueOrTagToMethodName.put("queue001","method001");
+         *          queueOrTagToMethodName.put("queue001","method001");
+         *           adapter.setQueueOrTagToMethodName(queueOrTagToMethodName);
          */
         container.setMessageListener(adapter);
         return container;
 
 
     }
-
 
 
 }
